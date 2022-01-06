@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/logrusorgru/aurora"
-	"github.com/spiceai/aping/pkg/ping"
+	"github.com/spiceai/sping/pkg/ping"
 )
 
 func main() {
