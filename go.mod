@@ -1,4 +1,4 @@
-module github.com/spiceai/aping
+module github.com/spiceai/sping
 
 go 1.17
 
