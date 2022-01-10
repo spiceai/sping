@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/url"
+	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -20,6 +21,10 @@ func main() {
 	var timeout time.Duration
 	flag.DurationVar(&timeout, "timeout", time.Second*5, "timeout for each ping")
 
+	var method string
+	flag.StringVar(&method, "method", "GET", "method to use for each ping")
+	method = strings.ToUpper(method)
+
 	flag.Parse()
 
 	if flag.NArg() < 1 {
@@ -29,18 +34,23 @@ func main() {
 		return
 	}
 
-	url, err := url.Parse(flag.Arg(0))
+	request, err := http.NewRequest(method, flag.Arg(0), nil)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
-	if url.Scheme == "" {
-		url.Scheme = "https"
+	if request.URL.Scheme == "" {
+		request, err = http.NewRequest(method, "https://"+flag.Arg(0), nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
-	pingClient := ping.NewPingClient(url, timeout)
+	pingClient := ping.NewPingClient(request, timeout)
 
-	fmt.Printf("SPING %s\n", aurora.BrightCyan(url.String()))
+	fmt.Printf("SPING %s %s\n", method, aurora.BrightCyan(request.URL.String()))
 
 	timer := time.NewTimer(0)
 

@@ -3,7 +3,6 @@ package ping
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"sort"
 	"time"
 
@@ -12,22 +11,24 @@ import (
 )
 
 type PingClient struct {
-	url    *url.URL
-	client *http.Client
+	request *http.Request
+	client  *http.Client
 
 	durations []float64
 }
 
-func NewPingClient(uri *url.URL, timeout time.Duration) *PingClient {
+func NewPingClient(request *http.Request, timeout time.Duration) *PingClient {
 	return &PingClient{
-		url:    uri,
-		client: &http.Client{Timeout: timeout},
+		request: request,
+		client: &http.Client{
+			Timeout: timeout,
+		},
 	}
 }
 
 func (p *PingClient) Ping() error {
 	start := time.Now()
-	resp, err := p.client.Get(p.url.String())
+	resp, err := p.client.Do(p.request)
 	if err != nil {
 		return err
 	}
@@ -45,9 +46,7 @@ func (p *PingClient) Ping() error {
 	duration := time.Since(start)
 	p.durations = append(p.durations, float64(duration))
 
-	host := aurora.BrightBlue(p.url.Host)
-
-	fmt.Printf("%s (%d bytes) from %s: time=%s\n", status, resp.ContentLength, host, duration)
+	fmt.Printf("%s (%d bytes) from %s: time=%s\n", status, resp.ContentLength, aurora.BrightBlue(p.request.Host), duration.Round(time.Microsecond))
 
 	return nil
 }
