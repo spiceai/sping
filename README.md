@@ -5,7 +5,7 @@ A simple tool for pinging APIs.
 ## Usage
 
 ```bash
-aping <url>
+sping <url>
 ```
 
 Example:
