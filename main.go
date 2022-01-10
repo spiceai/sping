@@ -26,6 +26,10 @@ func main() {
 		panic(err)
 	}
 
+	if url.Scheme == "" {
+		url.Scheme = "https"
+	}
+
 	pingClient := ping.NewPingClient(url)
 
 	fmt.Printf("SPING %s\n", aurora.BrightCyan(url.String()))
