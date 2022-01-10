@@ -18,10 +18,10 @@ type PingClient struct {
 	durations []float64
 }
 
-func NewPingClient(uri *url.URL) *PingClient {
+func NewPingClient(uri *url.URL, timeout time.Duration) *PingClient {
 	return &PingClient{
 		url:    uri,
-		client: &http.Client{},
+		client: &http.Client{Timeout: timeout},
 	}
 }
 
@@ -45,7 +45,9 @@ func (p *PingClient) Ping() error {
 	duration := time.Since(start)
 	p.durations = append(p.durations, float64(duration))
 
-	fmt.Printf("%s (%d bytes) from %s: time=%s\n", status, resp.ContentLength, p.url.Host, duration)
+	host := aurora.BrightBlue(p.url.Host)
+
+	fmt.Printf("%s (%d bytes) from %s: time=%s\n", status, resp.ContentLength, host, duration)
 
 	return nil
 }

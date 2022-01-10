@@ -14,10 +14,18 @@ import (
 )
 
 func main() {
+	var interval time.Duration
+	flag.DurationVar(&interval, "interval", time.Second, "interval between pings")
+
+	var timeout time.Duration
+	flag.DurationVar(&timeout, "timeout", time.Second*5, "timeout for each ping")
+
 	flag.Parse()
 
 	if flag.NArg() < 1 {
-		fmt.Println("Usage: aping <url>")
+		fmt.Println("Usage: aping <url> [-interval <duration>] [-timeout <duration>]")
+		fmt.Println()
+		fmt.Println("Example: aping data.spiceai.io/health -interval 5s -timeout 5s")
 		return
 	}
 
@@ -30,7 +38,7 @@ func main() {
 		url.Scheme = "https"
 	}
 
-	pingClient := ping.NewPingClient(url)
+	pingClient := ping.NewPingClient(url, timeout)
 
 	fmt.Printf("SPING %s\n", aurora.BrightCyan(url.String()))
 
@@ -47,7 +55,7 @@ func main() {
 				return
 			case <-timer.C:
 				pingClient.Ping()
-				timer.Reset(time.Second)
+				timer.Reset(interval)
 			}
 		}
 	}()
