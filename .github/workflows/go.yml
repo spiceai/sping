@@ -27,8 +27,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GOVER }}
-          go-os: ${{ matrix.target_os }}
-          go-arch: ${{ matrix.target_arch }}
 
       - name: Build
         run: go build .
