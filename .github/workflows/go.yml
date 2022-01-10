@@ -31,7 +31,7 @@ jobs:
           go-arch: ${{ matrix.target_arch }}
 
       - name: Build
-        run: go build -v ./...
+        run: go build .
 
       - name: Test
         run: go test -v ./...
