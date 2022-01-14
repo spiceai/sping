@@ -14,18 +14,18 @@ import (
 	"github.com/spiceai/sping/pkg/ping"
 )
 
+var (
+	interval time.Duration
+	timeout  time.Duration
+	method   string
+)
+
 func main() {
-	var interval time.Duration
-	flag.DurationVar(&interval, "interval", time.Second, "interval between pings")
+	flag.Parse()
 
-	var timeout time.Duration
-	flag.DurationVar(&timeout, "timeout", time.Second*5, "timeout for each ping")
-
-	var method string
-	flag.StringVar(&method, "method", "GET", "method to use for each ping")
 	method = strings.ToUpper(method)
 
-	flag.Parse()
+	fmt.Printf("%s\n", interval)
 
 	if flag.NArg() < 1 {
 		fmt.Println("Usage: aping <url> [-interval <duration>] [-timeout <duration>]")
@@ -75,4 +75,10 @@ func main() {
 	pingClient.PrintStats()
 
 	fmt.Println()
+}
+
+func init() {
+	flag.DurationVar(&interval, "interval", time.Second, "interval between pings")
+	flag.DurationVar(&timeout, "timeout", time.Second*5, "timeout for each ping")
+	flag.StringVar(&method, "method", "GET", "method to use for each ping")
 }
