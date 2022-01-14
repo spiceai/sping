@@ -62,6 +62,7 @@ func main() {
 		for {
 			select {
 			case <-signalChannel:
+				timer.Stop()
 				return
 			case <-timer.C:
 				pingClient.Ping()
