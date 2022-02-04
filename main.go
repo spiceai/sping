@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	interval time.Duration
-	timeout  time.Duration
-	method   string
+	interval    time.Duration
+	timeout     time.Duration
+	method      string
+	showContent bool
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 	fmt.Printf("%s\n", interval)
 
 	if flag.NArg() < 1 {
-		fmt.Println("Usage: aping <url> [-interval <duration>] [-timeout <duration>]")
+		fmt.Println("Usage: aping [-interval <duration>] [-timeout <duration>] [-show-content] <url>")
 		fmt.Println()
 		fmt.Println("Example: aping data.spiceai.io/health -interval 5s -timeout 5s")
 		return
@@ -48,7 +49,7 @@ func main() {
 		}
 	}
 
-	pingClient := ping.NewPingClient(request, timeout)
+	pingClient := ping.NewPingClient(request, timeout, showContent)
 
 	fmt.Printf("SPING %s %s\n", method, aurora.BrightCyan(request.URL.String()))
 
@@ -81,5 +82,6 @@ func main() {
 func init() {
 	flag.DurationVar(&interval, "interval", time.Second, "interval between pings")
 	flag.DurationVar(&timeout, "timeout", time.Second*5, "timeout for each ping")
+	flag.BoolVar(&showContent, "show-content", false, "show response content")
 	flag.StringVar(&method, "method", "GET", "method to use for each ping")
 }

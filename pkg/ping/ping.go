@@ -2,8 +2,10 @@ package ping
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/logrusorgru/aurora"
@@ -11,18 +13,20 @@ import (
 )
 
 type PingClient struct {
-	request *http.Request
-	client  *http.Client
+	request     *http.Request
+	client      *http.Client
+	showContent bool
 
 	durations []float64
 }
 
-func NewPingClient(request *http.Request, timeout time.Duration) *PingClient {
+func NewPingClient(request *http.Request, timeout time.Duration, showContent bool) *PingClient {
 	return &PingClient{
 		request: request,
 		client: &http.Client{
 			Timeout: timeout,
 		},
+		showContent: showContent,
 	}
 }
 
@@ -46,7 +50,18 @@ func (p *PingClient) Ping() error {
 	duration := time.Since(start)
 	p.durations = append(p.durations, float64(duration))
 
-	fmt.Printf("%s (%d bytes) from %s: time=%s\n", status, resp.ContentLength, aurora.BrightBlue(p.request.Host), duration.Round(time.Microsecond))
+	var content string
+	contentLength := resp.ContentLength
+	if p.showContent {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		content = " " + strings.TrimSpace(strings.SplitN(string(body), "\n", 2)[0])
+		contentLength = int64(len(body))
+	}
+
+	fmt.Printf("%s (%d bytes) from %s: time=%s%s\n", status, contentLength, aurora.BrightBlue(p.request.Host), duration.Round(time.Microsecond), content)
 
 	return nil
 }
