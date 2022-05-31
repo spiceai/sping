@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/logrusorgru/aurora"
 	"github.com/spiceai/sping/pkg/ping"
+	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -26,8 +26,6 @@ func main() {
 
 	method = strings.ToUpper(method)
 
-	fmt.Printf("%s\n", interval)
-
 	if flag.NArg() < 1 {
 		fmt.Println("Usage: aping [-interval <duration>] [-timeout <duration>] [-show-content] <url>")
 		fmt.Println()
@@ -35,23 +33,27 @@ func main() {
 		return
 	}
 
-	request, err := http.NewRequest(method, flag.Arg(0), nil)
-	if err != nil {
+	uri := fasthttp.AcquireURI()
+	defer fasthttp.ReleaseURI(uri)
+
+	if err := uri.Parse(nil, []byte(flag.Arg(0))); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	if request.URL.Scheme == "" {
-		request, err = http.NewRequest(method, "https://"+flag.Arg(0), nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+	if len(uri.Scheme()) == 0 {
+		uri.SetScheme("https")
 	}
 
-	pingClient := ping.NewPingClient(request, timeout, showContent)
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req)
+	req.SetURI(uri)
+	req.Header.SetMethod(method)
+	req.Header.Set("Accept-Encoding", "gzip")
 
-	fmt.Printf("SPING %s %s\n", method, aurora.BrightCyan(request.URL.String()))
+	pingClient := ping.NewPingClient(req, timeout, showContent)
+
+	fmt.Printf("SPING %s %s\n", method, aurora.BrightCyan(uri.String()))
 
 	timer := time.NewTimer(0)
 
