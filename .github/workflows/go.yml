@@ -21,10 +21,10 @@ jobs:
         target_arch: [amd64, arm64]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.8.0
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: ${{ env.GOVER }}
 
@@ -40,13 +40,13 @@ jobs:
           chmod +x sping
           tar cf sping_${{ matrix.target_os }}_${{ matrix.target_arch }}.tar.gz sping
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v2.3.1
         if: matrix.target_os != 'windows'
         with:
           name: sping_${{ matrix.target_os }}_${{ matrix.target_arch }}
           path: sping_${{ matrix.target_os }}_${{ matrix.target_arch }}.tar.gz
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v2.3.1
         if: matrix.target_os == 'windows'
         with:
           name: sping_${{ matrix.target_os }}_${{ matrix.target_arch }}
